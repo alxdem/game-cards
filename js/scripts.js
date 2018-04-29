@@ -1,7 +1,7 @@
 'use strict';
 
 var wrapper = document.querySelector('.wrapper');
-var deck = ['0C', '0D', '0H', '0S', '2C', '2D', '2H', '2S', '3C', '3D', '3H', '3S', '4C', '4D', '4H', '4S', '5C', '5D', '5H', '5S', '6C', '6D', '6H', '6S', '7C', '7D', '7H', '7S', '8C', '8D', '8H', '8S', '9C', '9D', '9H', '9S', 'AC', 'AD', 'AH', 'AS', 'JC', 'JD', 'JH', 'JS', 'KC', 'KD', 'KH', 'KS', 'QC', 'QD', 'QH', 'QS'];
+var deck = ['c0C', 'c0D', 'c0H', 'c0S', 'c2C', 'c2D', 'c2H', 'c2S', 'c3C', 'c3D', 'c3H', 'c3S', 'c4C', 'c4D', 'c4H', 'c4S', 'c5C', 'c5D', 'c5H', 'c5S', 'c6C', 'c6D', 'c6H', 'c6S', 'c7C', 'c7D', 'c7H', 'c7S', 'c8C', 'c8D', 'c8H', 'c8S', 'c9C', 'c9D', 'c9H', 'c9S', 'cAC', 'cAD', 'cAH', 'cAS', 'cJC', 'cJD', 'cJH', 'cJS', 'cKC', 'cKD', 'cKH', 'cKS', 'cQC', 'cQD', 'cQH', 'cQS'];
 var activeDeck = []; // Массив для взятых из колоды карт, которые лягут на стол
 var arrCompare = []; // Массив для сравнения 2-х карт
 
@@ -10,13 +10,35 @@ var arrCompare = []; // Массив для сравнения 2-х карт
 var randomCardsTake = function(arrowDeck, number) {
   for (var i = 0; i < number; i++) {
     var randCard = Math.floor(Math.random() * arrowDeck.length);
-    activeDeck.push(arrowDeck[randCard]); // Добавляем объект дважды в массив чтобы была пара
-    activeDeck.push(arrowDeck[randCard]);
+
+    var doubleCards = false; // Дубль карт
+
+    if(!activeDeck.length) {
+      activeDeck.push(arrowDeck[randCard]); // Добавляем объект дважды в массив чтобы была пара
+      activeDeck.push(arrowDeck[randCard]);
+    } else {
+      for (var j = 0; j < activeDeck.length; j++) {
+        if (arrowDeck[randCard] === activeDeck[j]) {
+          doubleCards = true; // Дубль карт
+        }
+      }
+
+      if (doubleCards) {
+        i--;
+      } else {
+        activeDeck.push(arrowDeck[randCard]); // Добавляем объект дважды в массив чтобы была пара
+        activeDeck.push(arrowDeck[randCard]);
+      }
+    }
+
   }
 }
 
 randomCardsTake(deck, 10); // Берем случайные 10 карт из колоды. arrowDeck - массив из которого берем. number - кол-во карт, которые берем
 
+for(var i = 0; i < activeDeck.length; i++){
+  console.log('d ' + activeDeck[i]);
+}
 
 // Вернем случайный результат сравнения
 var compareRandom = function(a, b) {
@@ -26,7 +48,6 @@ var compareRandom = function(a, b) {
 // Перемешиваем массив с взятыми картами
 activeDeck.sort(compareRandom);
 
-console.log(activeDeck);
 
 // Создание объекта
 var cardGenerate = function(value) {
@@ -60,7 +81,7 @@ var cardsCreate = function(cardName) {
 
   // Создание картинки карты
   var newCardImg = elementCreate('img');
-  newCardImg.src = 'img/' + cardName + '.png';
+  newCardImg.src = 'img/' + cardName.slice(1,3) + '.png'; // slice чтобы удалить у названия картинки первую буквы c. Ее добавил чтобы класс не начинался с цифры
 
   newCard.appendChild(newCardImg);
   newCardCell.appendChild(newCard);
@@ -87,15 +108,34 @@ var cardsCreateFragment = function(arrActiveDack) {
 
 cardsCreateFragment(activeDeck); // Создаем все активные карты и выводим их на экран
 
-// Функцуция снятия активного класса (перевернутой карты) со всех карт
-var allCardsHide = function (arrAllCards) {
+// Массив ссылок с картами на столе
+var arrCardsLink = [];
+arrCardsLink = document.querySelectorAll('.card-cell a');
+
+
+// Функцуция удаления класса у дочерних эелементов (массив в котором удаляем, класс который удаляем) (удаляем класс у картинки)
+var allCardsHide = function (arrAllCards, removeClass) {
   for (var i = 0; i < arrAllCards.length; i++) {
-    arrAllCards[i].classList.remove('active');
+    arrAllCards[i].childNodes[0].classList.remove(removeClass);
+  }
+}
+
+// Функцуция удаления класса (массив в котором удаляем, класс который удаляем) (удаляем класс у картинки)
+var classRemove = function (arrAllCards, removeClass) {
+  for (var i = 0; i < arrAllCards.length; i++) {
+    arrAllCards[i].classList.remove(removeClass);
   }
 }
 
 
-// Обработчик клина по карте
+// Функцуция удаления ID (массив в котором удаляем, класс который удаляем) (удаляем класс у картинки)
+var idRemove = function (arrAllCards, removeId) {
+  for (var i = 0; i < arrAllCards.length; i++) {
+    arrAllCards[i].removeAttribute('id');
+  }
+}
+
+// Обработчик клика по карте
 var cardClickHandler = function(e) {
   e.preventDefault();
 
@@ -105,14 +145,35 @@ var cardClickHandler = function(e) {
     var cardsListNew = document.querySelector('.card-list');
 
     while (targetCard !== cardsListNew) {
-      if (targetCard.tagName === 'A') {
+      if ((targetCard.tagName === 'A') && (!targetCard.hasAttribute('id'))) {
+        targetCard.id = 'target'; // Добавляем ID, чтобы при повторном клике на этой карте она не удалялась
         targetCard.childNodes[0].classList.add('active');
         var targetCardClass = targetCard.getAttribute('class'); // Получаем класс-id карты
         arrCompare.push(targetCardClass); // Добавляем класс элемента в массив для сравнения
         console.log('arrCompare: ' + arrCompare);
 
         if (arrCompare.length == 2) {
-          cardsClassCompare(arrCompare[0], arrCompare[1]);
+          // Функция сравнения 2 классов(карт) в массиве
+          if( cardsClassCompare(arrCompare[0], arrCompare[1])) {
+            //alert('da');
+            var arrCompareIndex = cardIndexFind(activeDeck, arrCompare[0]);
+            console.log('arrCompareIndex: ' + arrCompareIndex);
+            idRemove(arrCardsLink, 'target'); // Удаляем ID, который не дает кликать дважды по одной и той же карте
+            setTimeout(function() {
+              cardRemove(arrCompare[0]);
+              arrCompare = []; // Очищаем массив сравнения
+            }, 1000);
+
+            return;
+          }
+
+          // Переворачиваем обратно просмотренные карты, черех определенное время
+          setTimeout(function() {
+            idRemove(arrCardsLink, 'target'); // Удаляем класс, который не дает кликать дважды по одной и той же карте
+            allCardsHide(arrCardsLink, 'active');
+            arrCompare = []; // Очищаем массив сравнения
+          }, 1500);
+
         }
 
         return;
@@ -136,13 +197,47 @@ var cardsClassCompare = function(card1, card2) {
   }
 }
 
+
+// Функция поиска индекса совпавших карт (массив в котором ищем, значение карты, которое ищем)
+var cardIndexFind = function(arrMain, idCard) {
+  if([].indexOf) {
+    return arrMain.indexOf(idCard);
+  } else {
+    for (var i = 0; i < arrMain.length; i++) {
+      if (arrMain[i] === idCard) return i;
+    }
+  }
+
+  return -1;
+}
+
+
+// Функция удаления карты со стола (id удаляемой карты)
+var cardRemove = function(idCard) {
+  var cardRemoveItem = document.querySelectorAll('.' + idCard);
+  for(var i = 0; i < cardRemoveItem.length; i++) {
+    console.log('cardRemoveItem ' + idCard);
+  }
+
+  cardRemoveItem[0].classList.add('delete'); // Удаляем пару совпавших элементов, поэтому 2 remove
+  cardRemoveItem[1].classList.add('delete');
+}
+
+
 // Вешаем обработчик клика на все карты-ссылки
 var getCardLinks = function() {
-  var arrCardsLink = [];
-  arrCardsLink = document.querySelectorAll('.card-cell a');
+
   for (var i = 0; i < arrCardsLink.length; i++) {
     arrCardsLink[i].addEventListener('click', cardClickHandler);
   }
 }
 
 getCardLinks(); // Вешаем обработчик клика на все карты-ссылки
+
+// Кнопка запуска игры
+var startGameBtnHandler = function() {
+  alert('f');
+}
+
+var startGameBtn = document.querySelector('.button-start'); // Кнопка запуска игры
+startGameBtn.addEventListener('click', startGameBtnHandler);

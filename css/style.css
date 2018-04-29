@@ -22,6 +22,10 @@
   position: relative;
 }
 
+.card-cell a.delete{
+  display: none;
+}
+
 .card-cell a::after{
   content: '';
   position: absolute;
@@ -53,6 +57,7 @@
   box-sizing: border-box;
   padding: 0 10px;
   margin: 0 0 5px;
+  height: 210px;
   width: 20%;
   list-style: none;
   display: flex;
