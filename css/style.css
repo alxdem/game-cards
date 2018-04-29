@@ -1,11 +1,21 @@
+html{
+  height: 100%;
+  font-family: 'Verdana', 'Arial', sans-serif;
+}
+
 .body{
   background: #002211;
+  height: 100%;
 }
 
 .wrapper{
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .start-game{
@@ -48,6 +58,7 @@
 
 .card-list{
   padding: 0;
+  width: 850px;
   margin: 0 -10px;
   display: flex;
   flex-wrap: wrap;
@@ -64,6 +75,37 @@
   justify-content: center;
 }
 
+.button{
+  background: #ffffff;
+  padding: 12px 20px;
+  color: #000000;
+  cursor: pointer;
+  border: 0;
+  border-radius: 4px;
+  font-family: 'Verdana', 'Arial', sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+  opacity: 0.8;
+  box-shadow: 0px 1px 20px -2px rgba(255, 255, 255, 0.1);
+  transition: all ease 0.2s;
+}
+
+.button:hover{
+  box-shadow: 0px 1px 20px -2px rgba(255, 255, 255, 1);
+  opacity: 1;
+}
+
+.congratulation-block{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.congratulation-text{
+  color: #ffffff;
+  font-size: 28px;
+  margin: 0 0 20px;
+}
 
 @media (min-width: 992px) {
 

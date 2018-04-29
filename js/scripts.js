@@ -4,6 +4,9 @@ var wrapper = document.querySelector('.wrapper');
 var deck = ['c0C', 'c0D', 'c0H', 'c0S', 'c2C', 'c2D', 'c2H', 'c2S', 'c3C', 'c3D', 'c3H', 'c3S', 'c4C', 'c4D', 'c4H', 'c4S', 'c5C', 'c5D', 'c5H', 'c5S', 'c6C', 'c6D', 'c6H', 'c6S', 'c7C', 'c7D', 'c7H', 'c7S', 'c8C', 'c8D', 'c8H', 'c8S', 'c9C', 'c9D', 'c9H', 'c9S', 'cAC', 'cAD', 'cAH', 'cAS', 'cJC', 'cJD', 'cJH', 'cJS', 'cKC', 'cKD', 'cKH', 'cKS', 'cQC', 'cQD', 'cQH', 'cQS'];
 var activeDeck = []; // Массив для взятых из колоды карт, которые лягут на стол
 var arrCompare = []; // Массив для сравнения 2-х карт
+var arrCardsLink = []; // Массив ссылок с картами на столе
+var cardsCount = 10; // Сколько пар карт участвует в игре
+var cardCountEndGame = 0; //Переменная для подсчета убранных карт. Если она равна длине массива на столе - то игра закончена
 
 
 // Берем случайные 10 карт из колоды. arrowDeck - массив из которого берем. number - кол-во карт, которые берем
@@ -34,19 +37,10 @@ var randomCardsTake = function(arrowDeck, number) {
   }
 }
 
-randomCardsTake(deck, 10); // Берем случайные 10 карт из колоды. arrowDeck - массив из которого берем. number - кол-во карт, которые берем
-
-for(var i = 0; i < activeDeck.length; i++){
-  console.log('d ' + activeDeck[i]);
-}
-
 // Вернем случайный результат сравнения
 var compareRandom = function(a, b) {
   return Math.random() - 0.5;
 }
-
-// Перемешиваем массив с взятыми картами
-activeDeck.sort(compareRandom);
 
 
 // Создание объекта
@@ -57,9 +51,6 @@ var cardGenerate = function(value) {
 
   return cardObject;
 }
-
-cardGenerate('0C');
-console.log(cardGenerate('0C'));
 
 
 // Создание элемента по тегу и классу
@@ -103,14 +94,6 @@ var cardsCreateFragment = function(arrActiveDack) {
   wrapper.appendChild(cardsList); // Выводим полученный список внутрь wrapper
 
 }
-
-
-
-cardsCreateFragment(activeDeck); // Создаем все активные карты и выводим их на экран
-
-// Массив ссылок с картами на столе
-var arrCardsLink = [];
-arrCardsLink = document.querySelectorAll('.card-cell a');
 
 
 // Функцуция удаления класса у дочерних эелементов (массив в котором удаляем, класс который удаляем) (удаляем класс у картинки)
@@ -182,12 +165,10 @@ var cardClickHandler = function(e) {
       targetCard = targetCard.parentNode;
     }
   } else {
-    //allCardsHide(allCardsImg);
 
   }
 
 }
-
 
 
 // Функция сравнения 2 классов(карт) в массиве
@@ -221,6 +202,45 @@ var cardRemove = function(idCard) {
 
   cardRemoveItem[0].classList.add('delete'); // Удаляем пару совпавших элементов, поэтому 2 remove
   cardRemoveItem[1].classList.add('delete');
+
+  endGameShow(); // Проверка, не пора ли заканчивать игру
+}
+
+// Проверка, не пора ли заканчивать игру
+var endGameShow = function() {
+  cardCountEndGame++;
+  if(cardCountEndGame == cardsCount) {
+    congratulation();
+  }
+}
+
+
+// Выводим сообщение о победе
+var congratulation = function() {
+  var cardsListNew = document.querySelector('.card-list');
+  cardsListNew.remove();
+  var congratulationBlock = elementCreate('div', 'congratulation-block');
+  var congratulationText = elementCreate('h2', 'congratulation-text');
+  congratulationText.textContent = 'Поздравляем!';
+  var congratulationBtn = elementCreate('button', 'button');
+  congratulationBtn.textContent = 'Начать заново';
+
+  // Очищаем все данные и массивы
+  activeDeck = []; // Массив для взятых из колоды карт, которые лягут на стол
+  arrCompare = []; // Массив для сравнения 2-х карт
+  arrCardsLink = []; // Массив ссылок с картами на столе
+  cardCountEndGame = 0; //Переменная для подсчета убранных карт. Если она равна длине массива на столе - то игра закончена
+
+  // Обработчик начала игры после победы
+  var startGameAfterWinHandler = function(e){
+    congratulationBlock.remove();
+  }
+  congratulationBtn.addEventListener('click', startGameAfterWinHandler);
+  congratulationBtn.addEventListener('click', startGameBtnHandler);
+
+  congratulationBlock.appendChild(congratulationText);
+  congratulationBlock.appendChild(congratulationBtn);
+  wrapper.appendChild(congratulationBlock);
 }
 
 
@@ -232,12 +252,20 @@ var getCardLinks = function() {
   }
 }
 
-getCardLinks(); // Вешаем обработчик клика на все карты-ссылки
 
 // Кнопка запуска игры
-var startGameBtnHandler = function() {
-  alert('f');
+var startGameBtnHandler = function(e) {
+  var targetBtnStart = e.target;
+  targetBtnStart.remove(); // Удаление кнопки старта
+  randomCardsTake(deck, cardsCount); // Берем случайные 10 карт из колоды. arrowDeck - массив из которого берем. number - кол-во карт, которые берем
+  activeDeck.sort(compareRandom); // Перемешиваем массив с взятыми картами
+  cardsCreateFragment(activeDeck); // Создаем все активные карты и выводим их на экран
+
+  arrCardsLink = document.querySelectorAll('.card-cell a');
+  getCardLinks(); // Вешаем обработчик клика на все карты-ссылки
 }
 
-var startGameBtn = document.querySelector('.button-start'); // Кнопка запуска игры
+var startGameBtn = document.querySelector('.btn-start'); // Кнопка запуска игры
 startGameBtn.addEventListener('click', startGameBtnHandler);
+
+
