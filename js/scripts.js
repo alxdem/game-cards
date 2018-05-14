@@ -1,12 +1,15 @@
 'use strict';
 
+var bodyBlock = document.querySelector('body');
 var wrapper = document.querySelector('.wrapper');
 var deck = ['c0C', 'c0D', 'c0H', 'c0S', 'c2C', 'c2D', 'c2H', 'c2S', 'c3C', 'c3D', 'c3H', 'c3S', 'c4C', 'c4D', 'c4H', 'c4S', 'c5C', 'c5D', 'c5H', 'c5S', 'c6C', 'c6D', 'c6H', 'c6S', 'c7C', 'c7D', 'c7H', 'c7S', 'c8C', 'c8D', 'c8H', 'c8S', 'c9C', 'c9D', 'c9H', 'c9S', 'cAC', 'cAD', 'cAH', 'cAS', 'cJC', 'cJD', 'cJH', 'cJS', 'cKC', 'cKD', 'cKH', 'cKS', 'cQC', 'cQD', 'cQH', 'cQS'];
 var activeDeck = []; // Массив для взятых из колоды карт, которые лягут на стол
 var arrCompare = []; // Массив для сравнения 2-х карт
 var arrCardsLink = []; // Массив ссылок с картами на столе
-var cardsCount = 10; // Сколько пар карт участвует в игре
+var cardsCount = 9; // Сколько пар карт участвует в игре
 var cardCountEndGame = 0; //Переменная для подсчета убранных карт. Если она равна длине массива на столе - то игра закончена
+var score = 0; // Переменная для подсчета очков
+var startGameBtn = document.querySelector('.btn-start'); // Кнопка запуска игры
 
 
 // Берем случайные 10 карт из колоды. arrowDeck - массив из которого берем. number - кол-во карт, которые берем
@@ -122,6 +125,8 @@ var idRemove = function (arrAllCards, removeId) {
 var cardClickHandler = function(e) {
   e.preventDefault();
 
+  var infoScoreGoals = document.querySelector('.info-score-goals'); // Поле для счета в блоке с информацией
+
   if (arrCompare.length < 2) {
 
     var targetCard = e.target;
@@ -141,13 +146,23 @@ var cardClickHandler = function(e) {
             //alert('da');
             var arrCompareIndex = cardIndexFind(activeDeck, arrCompare[0]);
             console.log('arrCompareIndex: ' + arrCompareIndex);
+
+            score += 50; // При совпадении добавляем 50 очков
             idRemove(arrCardsLink, 'target'); // Удаляем ID, который не дает кликать дважды по одной и той же карте
             setTimeout(function() {
               cardRemove(arrCompare[0]);
               arrCompare = []; // Очищаем массив сравнения
             }, 1000);
 
+            console.log('score: ' + score);
+            infoScoreGoals.textContent = score;
             return;
+          }
+
+          score -= 30; // При несовпадении добавляем 50 очков
+          // Проверяем, если счет меньше 0, то оставляем его на нуле
+          if (score < 0) {
+            score = 0;
           }
 
           // Переворачиваем обратно просмотренные карты, черех определенное время
@@ -157,6 +172,8 @@ var cardClickHandler = function(e) {
             arrCompare = []; // Очищаем массив сравнения
           }, 1500);
 
+          console.log('score: ' + score);
+          infoScoreGoals.textContent = score;
         }
 
         return;
@@ -221,7 +238,9 @@ var congratulation = function() {
   cardsListNew.remove();
   var congratulationBlock = elementCreate('div', 'congratulation-block');
   var congratulationText = elementCreate('h2', 'congratulation-text');
+  var congratulationScore = elementCreate('div', 'congratulation-score');
   congratulationText.textContent = 'Поздравляем!';
+  congratulationScore.textContent = 'Вы набрали ' + score + ' очков';
   var congratulationBtn = elementCreate('button', 'button');
   congratulationBtn.textContent = 'Начать заново';
 
@@ -239,6 +258,7 @@ var congratulation = function() {
   congratulationBtn.addEventListener('click', startGameBtnHandler);
 
   congratulationBlock.appendChild(congratulationText);
+  congratulationBlock.appendChild(congratulationScore);
   congratulationBlock.appendChild(congratulationBtn);
   wrapper.appendChild(congratulationBlock);
 }
@@ -253,6 +273,20 @@ var getCardLinks = function() {
 }
 
 
+// Создание строки с информацией
+var infoLineInit = function() {
+  var infoLine = elementCreate('div', 'info-line'); // Блок-строка с информацией
+  var infoLineScore = elementCreate('div', 'info-score'); // Блок для счета
+  var infoLineScoreGoals = elementCreate('span', 'info-score-goals');
+
+  infoLineScoreGoals.textContent = '0';
+  infoLineScore.textContent = 'Счет: ';
+  infoLineScore.appendChild(infoLineScoreGoals);
+  infoLine.appendChild(infoLineScore);
+  bodyBlock.appendChild(infoLine);
+}
+
+
 // Кнопка запуска игры
 var startGameBtnHandler = function(e) {
   var targetBtnStart = e.target;
@@ -263,9 +297,8 @@ var startGameBtnHandler = function(e) {
 
   arrCardsLink = document.querySelectorAll('.card-cell a');
   getCardLinks(); // Вешаем обработчик клика на все карты-ссылки
+
+  infoLineInit(); // Создание строки с информацией
 }
 
-var startGameBtn = document.querySelector('.btn-start'); // Кнопка запуска игры
-startGameBtn.addEventListener('click', startGameBtnHandler);
-
-
+startGameBtn.addEventListener('click', startGameBtnHandler); // Запуск игры
