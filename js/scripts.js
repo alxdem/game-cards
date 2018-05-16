@@ -6,7 +6,7 @@ var deck = ['c0C', 'c0D', 'c0H', 'c0S', 'c2C', 'c2D', 'c2H', 'c2S', 'c3C', 'c3D'
 var activeDeck = []; // Массив для взятых из колоды карт, которые лягут на стол
 var arrCompare = []; // Массив для сравнения 2-х карт
 var arrCardsLink = []; // Массив ссылок с картами на столе
-var cardsCount = 9; // Сколько пар карт участвует в игре
+var cardsCount = 2; // Сколько пар карт участвует в игре
 var cardCountEndGame = 0; //Переменная для подсчета убранных карт. Если она равна длине массива на столе - то игра закончена
 var score = 0; // Переменная для подсчета очков
 var startGameBtn = document.querySelector('.btn-start'); // Кнопка запуска игры
@@ -154,7 +154,7 @@ var cardClickHandler = function(e) {
               arrCompare = []; // Очищаем массив сравнения
             }, 1000);
 
-            console.log('score: ' + score);
+            console.log('score 1: ' + score);
             infoScoreGoals.textContent = score;
             return;
           }
@@ -172,7 +172,7 @@ var cardClickHandler = function(e) {
             arrCompare = []; // Очищаем массив сравнения
           }, 1500);
 
-          console.log('score: ' + score);
+          console.log('score 2: ' + score);
           infoScoreGoals.textContent = score;
         }
 
@@ -227,20 +227,61 @@ var cardRemove = function(idCard) {
 var endGameShow = function() {
   cardCountEndGame++;
   if(cardCountEndGame == cardsCount) {
-    congratulation();
+    // congratulation();
+    playerDataInit();
   }
 }
 
+// Создаем форму для ввода имени игрока
+var playerFormInit = function() {
+  var playerNameForm = elementCreate('form', 'player-form'); // Форма для ввода имени игрока
+  var congratulationText = elementCreate('h2', 'congratulation-text');
+  var congratulationScore = elementCreate('div', 'congratulation-score');
+  var playerNameLine = elementCreate('div', 'player-name-line'); // Строка для поля ввода и label
+  var playerName = elementCreate('input', 'player-name'); // Поле для вводи имени игрока
+  playerName.setAttribute('type', 'text');
+  var playerNameLabel = elementCreate('label', 'player-name-label'); // Текст-пояснение
+  playerNameLabel.textContent = 'Введите ваше имя: ';
+  var congratulationNameBtn = elementCreate('button', 'enter-name-button');
+  congratulationText.textContent = 'Поздравляем!';
+  congratulationScore.textContent = 'Вы набрали ' + score + ' очков';
+  congratulationNameBtn.classList.add('button');
+  congratulationNameBtn.textContent = 'Готово';
 
-// Выводим сообщение о победе
-var congratulation = function() {
+  playerNameLine.appendChild(playerNameLabel);
+  playerNameLine.appendChild(playerName);
+  playerNameForm.appendChild(congratulationText);
+  playerNameForm.appendChild(congratulationScore);
+  playerNameForm.appendChild(playerNameLine);
+  playerNameForm.appendChild(congratulationNameBtn);
+
+  congratulationNameBtn.addEventListener('click', congratulation);
+
+  return playerNameForm;
+}
+
+
+// Выводим форму для заполнения имени победителя
+var playerDataInit = function() {
   var cardsListNew = document.querySelector('.card-list');
   cardsListNew.remove();
   var congratulationBlock = elementCreate('div', 'congratulation-block');
-  var congratulationText = elementCreate('h2', 'congratulation-text');
-  var congratulationScore = elementCreate('div', 'congratulation-score');
-  congratulationText.textContent = 'Поздравляем!';
-  congratulationScore.textContent = 'Вы набрали ' + score + ' очков';
+
+
+
+
+
+  congratulationBlock.appendChild(playerFormInit());
+  wrapper.appendChild(congratulationBlock);
+}
+
+// Выводим сообщение о победе
+var congratulation = function() {
+
+  var congratulationBlock = document.querySelector('.congratulation-block');
+  var congratulationText = document.querySelector('.congratulation-text');
+  var congratulationScore = document.querySelector('.congratulation-score');
+  var playerNameForm = document.querySelector('.player-form');
   var congratulationBtn = elementCreate('button', 'button');
   congratulationBtn.textContent = 'Начать заново';
 
@@ -249,6 +290,7 @@ var congratulation = function() {
   arrCompare = []; // Массив для сравнения 2-х карт
   arrCardsLink = []; // Массив ссылок с картами на столе
   cardCountEndGame = 0; //Переменная для подсчета убранных карт. Если она равна длине массива на столе - то игра закончена
+  score = 0; // Переменная с набранными очками
 
   // Обработчик начала игры после победы
   var startGameAfterWinHandler = function(e){
@@ -257,10 +299,9 @@ var congratulation = function() {
   congratulationBtn.addEventListener('click', startGameAfterWinHandler);
   congratulationBtn.addEventListener('click', startGameBtnHandler);
 
-  congratulationBlock.appendChild(congratulationText);
-  congratulationBlock.appendChild(congratulationScore);
+
   congratulationBlock.appendChild(congratulationBtn);
-  wrapper.appendChild(congratulationBlock);
+
 }
 
 
@@ -275,6 +316,9 @@ var getCardLinks = function() {
 
 // Создание строки с информацией
 var infoLineInit = function() {
+  if(document.querySelector('.info-line')) {
+    document.querySelector('.info-line').remove();
+  }
   var infoLine = elementCreate('div', 'info-line'); // Блок-строка с информацией
   var infoLineScore = elementCreate('div', 'info-score'); // Блок для счета
   var infoLineScoreGoals = elementCreate('span', 'info-score-goals');
